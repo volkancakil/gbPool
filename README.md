@@ -21,12 +21,18 @@
 
     // There is a testing.go file at the root, you can use it for testing
     logger := logrus.New()
-      // You can custom your logging setting
-    pool := pool.NewProxyPool(logger)
-    pool.NewManager("ihuan")
-    mgr := pool.ProxyMgr["ihuan"]
-    proxy := <- mgr.ProxyChan
-    fmt.Println(proxy.Address)
+	logger.SetReportCaller(true)
+	proxyPool := pool.NewProxyPool(logger)
+	proxyPool.NewManager("ihuan")
+	for {
+		proxy := <- proxyPool.ProxyChan
+		fmt.Println(proxy.Address)
+		time.Sleep(time.Second)
+		t := rand.Intn(9)
+		if t > 5 {
+			proxy.ReUse(proxyPool.ProxyChan)
+		}
+	}
 
 ### Things that you needs to know
 - This is a personal developed module, the main purpose is to help people get a more statble & anonymous way to gather the data they need.
