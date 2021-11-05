@@ -8,7 +8,7 @@
 - Switch different proxy 
 - Easy to implement your own provider
 - Support manually enable | disable manager
-- Support custom process to a proxy(drop | reuse | expired)
+- Support custom process to a proxy(drop | reuse | expired, you can also implement your own process)
 - More and more coming soon with your help.
 
 ### Install
