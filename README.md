@@ -1,5 +1,5 @@
 # GBPool-- a simple but useful golang free proxy pool
-## Intro(eng) (zh-cn)
+## Intro([English](https://github.com/jobber2955/gbPool/blob/main/README.md)) ([中文](https://github.com/jobber2955/gbPool/blob/main/README_cn.md))
 ### GBPool, golang baipiao proxy pool, a free & simple golang proxy pool module, gathering proxies from those kindness free proxy provider.Developed for indiviual use, but you can apply it anywhere you want.
 ### Thanks(also if my project is affecting your service, please post a issue and i will remove your service immediately.)
 - [ihuan](https://ip.ihuan.me/)
