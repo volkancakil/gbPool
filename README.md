@@ -5,7 +5,7 @@
 - [ihuan](https://ip.ihuan.me/)
 
 ### What can it do?
-- Switch different proxy 
+- Switch different proxy
 - Easy to implement your own provider
 - Support manually enable | disable manager
 - Support custom process to a proxy(drop | reuse | expired, you can also implement your own process)
@@ -34,10 +34,10 @@
 		}
 	}
 
-### Things that you needs to know
-- This is a personal developed module, the main purpose is to help people get a more statble & anonymous way to gather the data they need.
-- This package is not for abruptly annoying or even acctack those free proxy providers. In contrary, i hope this package can reduce the pressure for them, as this project is more steerable & less request.
-- Please be known this is a personal & indiviual work, some problem may not be answered or solved immediately. Welcome to contribute!
+### Things that you need to know
+- This is a personally developed module, the main purpose is to help people get a more stable & anonymous way to gather the data they need.
+- This module is not for abruptly annoying or even attack those free proxy providers. In contrary, i hope this package can reduce the pressure for them, as this project is more steerable & less request.
+- Please be known this is a personal & individual work, some problem may not be answered or solved immediately. Welcome to contribute!
 - Using this project is on your own responsibility, any consequence is yours.
 - I'm quite a noob in programming, so if you have bug | suggestion, please let me know in the issue.
 
