@@ -6,7 +6,7 @@
 
 ### What can it do?
 - Switch different proxy 
-- Easy to implment your own provider
+- Easy to implement your own provider
 - Support manually enable | disable manager
 - Support custom process to a proxy(drop | reuse | expired)
 - More and more coming soon with your help.
