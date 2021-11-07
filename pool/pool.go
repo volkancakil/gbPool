@@ -4,6 +4,9 @@ import (
 	"gbPool/public"
 )
 
+// NewProxyPool Create a proxy pool. Proxy pool is used to contain all kinds of manager,
+// and all manager share a single proxy channel.
+// channelSize is the size of the proxy channel.Strongly suggest set a larger num than you really needs for buffering
 func NewProxyPool(channelSize int) *ProxyPool {
 	return &ProxyPool{
 		ProxyChan: make(chan *public.Proxy, channelSize),

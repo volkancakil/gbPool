@@ -18,6 +18,9 @@ type manager struct {
 	proxyChan chan *public.Proxy
 }
 
+// NewManager Create a new manager for a provider, Manager is used to handle fetch proxy & monitor proxy status
+// managerType is the type of manager needs to be created.
+// config is the specific type of config for that manager
 func (p *ProxyPool) NewManager(managerType string, config interface{}) error {
 	var err error
 	if p.ProxyMgr[managerType] == nil {

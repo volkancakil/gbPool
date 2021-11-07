@@ -20,6 +20,8 @@ var (
 	ihuanCache = "https://ip.ihuan.me/mouse.do"
 )
 
+// NewIhuanFetcher Create a new ihuan proxy fetcher, dest is the destination proxy channel, where fetched proxies are going.
+// config is the specific config struct for ihuan
 func NewIhuanFetcher(dest chan *public.Proxy, config *public.IhuanConfig) *ihuanFetcher {
 	client := &fasthttp.Client{
 		ReadTimeout:  10 * time.Second,
