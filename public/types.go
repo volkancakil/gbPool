@@ -21,3 +21,16 @@ func (p *Proxy) Expired(dest chan *Proxy) {
 	}
 	p.ReUse(dest)
 }
+
+type IhuanConfig struct {
+	Num         string
+	Anonymity   string
+	Type        string
+	Post        string
+	Sort        string
+	Port        string
+	KillPort    string
+	Address     string
+	Key         string
+	KillAddress string
+}

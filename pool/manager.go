@@ -1,11 +1,12 @@
 package pool
 
 import (
+	"errors"
+	"fmt"
 	"gbPool/fetcher"
 	"gbPool/monitor"
 	"gbPool/public"
-	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
+	"strconv"
 	"sync"
 )
 
@@ -17,35 +18,50 @@ type manager struct {
 	proxyChan chan *public.Proxy
 }
 
-func newProxyManager(managerType string, logger *logrus.Logger, proxyChan chan *public.Proxy) *manager {
-	mgr := &manager{}
-	size := viper.GetInt("size")
-	if size == 0 || size > 100 {
-		size = 100
+func (p *ProxyPool) NewManager(managerType string, config interface{}) error {
+	var err error
+	if p.ProxyMgr[managerType] == nil {
+		p.ProxyMgr[managerType], err = newProxyManager(managerType, p.ProxyChan, config)
+		if err != nil {
+			return err
+		}
+		return nil
+	} else {
+		return errors.New(fmt.Sprintf("%s manager already exist", managerType))
 	}
+}
+
+func newProxyManager(managerType string, proxyChan chan *public.Proxy, config interface{}) (*manager, error) {
+	edge := 0
+	mgr := &manager{}
 	mgr.proxyChan = proxyChan
 
 	switch managerType {
 	case "ihuan":
-		f := fetcher.NewFetcher(managerType, logger, mgr.proxyChan)
+		c := config.(*public.IhuanConfig)
+
+		// If conversion failed, edge will be 0, and that's normal and ok
+		edge, _ = strconv.Atoi(c.Num)
+		f := fetcher.NewIhuanFetcher(mgr.proxyChan, c)
 		mgr.fetcher = f
 	default:
-		logger.Error("Unknown type: %s", managerType)
-		return nil
+		return nil, errors.New(fmt.Sprintf("unknown type: %s", managerType))
 	}
 
 	if mgr.fetcher == nil {
-		return nil
+		return nil, errors.New(fmt.Sprintf("%s fetcher is nil", managerType))
 	}
 
-	m := monitor.NewMonitor(mgr.proxyChan, mgr.fetcher, logger)
+	m, err := monitor.NewMonitor(mgr.proxyChan, mgr.fetcher, edge)
+	if err != nil {
+		return nil, err
+	}
 	mgr.monitor = m
 	if mgr.monitor == nil {
-		return nil
+		return nil, errors.New(fmt.Sprintf("%s monitor is nil", managerType))
 	}
 
-	mgr.Enable()
-	return mgr
+	return mgr, nil
 }
 
 func (m *manager) Enable() {

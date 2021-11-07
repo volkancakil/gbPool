@@ -2,11 +2,12 @@ package fetcher
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
 	"gbPool/public"
 	"gbPool/utils"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/google/go-querystring/query"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/valyala/fasthttp"
 	"github.com/valyala/fasthttp/fasthttpproxy"
@@ -21,7 +22,7 @@ var (
 	ihuanCache = "https://ip.ihuan.me/mouse.do"
 )
 
-func newIhuanFetcher(logger *logrus.Logger, dest chan *public.Proxy) *ihuanFetcher {
+func NewIhuanFetcher(dest chan *public.Proxy, config *public.IhuanConfig) *ihuanFetcher {
 	client := &fasthttp.Client{
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 15 * time.Second,
@@ -32,29 +33,33 @@ func newIhuanFetcher(logger *logrus.Logger, dest chan *public.Proxy) *ihuanFetch
 
 	return &ihuanFetcher{
 		httpClient: client,
-		logger:     logger,
 		dest:       dest,
+		config: config,
 	}
 }
 
 type ihuanFetcher struct {
 	httpClient *fasthttp.Client
-	logger     *logrus.Logger
 	dest       chan *public.Proxy
 	key        string
 	rawIps     string
+	config	   *public.IhuanConfig
 }
 
-func (i *ihuanFetcher) Do() {
+func (i *ihuanFetcher) Do() error {
 	if i.key == "" {
-		i.init()
+		if err := i.init(); err != nil {
+			return err
+		}
 	}
-	i.fetch()
+	if err := i.fetch(); err != nil {
+		return err
+	}
 	i.parse()
+	return nil
 }
 
-func (i *ihuanFetcher) init() {
-	i.logger.Info("Loading ihuan post key")
+func (i *ihuanFetcher) init() error {
 	req := &fasthttp.Request{}
 	res := &fasthttp.Response{}
 
@@ -64,26 +69,31 @@ func (i *ihuanFetcher) init() {
 	req.Header.SetUserAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36")
 
 	if err := i.httpClient.Do(req, res); err != nil {
-		i.logger.Error(err)
-		return
+		return err
 	}
 
 	if res.Header.Peek("set-cookie") != nil {
 		cookie := string(res.Header.Peek("set-cookie"))
-		i.key = i.loadCache(cookie)
+		var err error
+
+		if err = i.loadCache(cookie); err != nil {
+			return err
+		}
 	} else {
-		body := utils.ReadBody(res, i.logger)
+		body, err := utils.ReadBody(res)
+		if err != nil {
+			return err
+		}
 		if doc, err := goquery.NewDocumentFromReader(bytes.NewReader(body)); err != nil {
-			i.logger.Error(err)
-			return
+			return err
 		} else {
 			i.key = doc.Find(`[name="key"]`).AttrOr("value", "")
 		}
 	}
+	return nil
 }
 
-func (i *ihuanFetcher) loadCache(cookie string) string {
-	i.logger.Info("Loading ihuan post key cache")
+func (i *ihuanFetcher) loadCache(cookie string) error {
 	req := &fasthttp.Request{}
 	res := &fasthttp.Response{}
 
@@ -94,49 +104,47 @@ func (i *ihuanFetcher) loadCache(cookie string) string {
 	req.Header.Set("cookie", cookie)
 	req.Header.Set("referer", "https://ip.ihuan.me/ti.html")
 	if err := i.httpClient.Do(req, res); err != nil {
-		i.logger.Error(err)
-		return ""
+		return err
 	}
 
-	body := utils.ReadBody(res, i.logger)
+	body, err := utils.ReadBody(res)
+	if err != nil {
+		return err
+	}
+
 	rePattern, err := regexp.Compile("[a-zA-z0-9]{32}")
 	if err != nil {
-		i.logger.Error(err)
-		return ""
+		return err
 	}
+
 	cache := rePattern.Find(body)
 	if cache != nil {
-		i.logger.Infof("Cache Found: %s\n", string(cache))
-		return string(cache)
+		i.key = string(cache)
+		return  nil
+	} else {
+		return errors.New(fmt.Sprintf("failed to find cache key, raw: %s", string(body)))
 	}
-	return ""
 }
 
-func (i *ihuanFetcher) fetch() {
-	i.logger.Info("Fetching ihuan proxies")
-	if i.key == "" {
-		i.logger.Error("ihuan key empty")
-		return
-	}
+func (i *ihuanFetcher) fetch() error {
 	req := &fasthttp.Request{}
 	res := &fasthttp.Response{}
 
 	postStruct := &ihuanPost{
-		Num:         viper.GetString("size"),
-		Anonymity:   viper.GetString("ihuan_anonymity"),
-		Type:        viper.GetString("ihuanP_type"),
-		Post:        viper.GetString("ihuan_post"),
-		Sort:        viper.GetString("ihuan_sort"),
-		Port:        viper.GetString("ihuan_port"),
-		KillPort:    viper.GetString("ihuan_kill_port"),
-		Address:     viper.GetString("ihuan_address"),
-		KillAddress: viper.GetString("ihuan_kill_address"),
+		Num:         i.config.Num,
+		Anonymity:   i.config.Anonymity,
+		Type:        i.config.Type,
+		Post:        i.config.Post,
+		Sort:        i.config.Sort,
+		Port:        i.config.Port,
+		KillPort:    i.config.KillPort,
+		Address:     i.config.Address,
+		KillAddress: i.config.KillAddress,
 		Key:         i.key,
 	}
 	postValues, err := query.Values(postStruct)
 	if err != nil {
-		i.logger.Error(err)
-		return
+		return err
 	}
 
 	req.SetRequestURI(ihuanApi)
@@ -147,28 +155,28 @@ func (i *ihuanFetcher) fetch() {
 	req.Header.SetUserAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36")
 
 	if err := i.httpClient.Do(req, res); err != nil {
-		i.logger.Error(err)
-		return
+		return err
 	}
 
-	body := utils.ReadBody(res, i.logger)
+	body, err := utils.ReadBody(res)
+	if err != nil {
+		return err
+	}
+
 	if doc, err := goquery.NewDocumentFromReader(bytes.NewReader(body)); err != nil {
-		return
+		return err
 	} else {
 		rawIPs, err := doc.Find(`div.col-md-10>div.panel.panel-default>div.panel-body`).Html()
 		if err != nil {
-			return
+			return err
 		}
+
 		i.rawIps = rawIPs
+		return nil
 	}
 }
 
 func (i *ihuanFetcher) parse() {
-	i.logger.Info("Parsing ihuan raw ips")
-	if i.rawIps == "" {
-		i.logger.Error("ihuan raw ip empty")
-		return
-	}
 	for _, ip := range strings.Split(i.rawIps, "<br/>") {
 		i.dest <- &public.Proxy{
 			Address: ip,

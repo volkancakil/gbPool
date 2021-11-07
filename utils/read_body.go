@@ -1,11 +1,10 @@
 package utils
 
 import (
-	"github.com/sirupsen/logrus"
 	"github.com/valyala/fasthttp"
 )
 
-func ReadBody(res *fasthttp.Response, logger *logrus.Logger) []byte {
+func ReadBody(res *fasthttp.Response) ([]byte, error) {
 	var body []byte
 	var err error
 	switch string(res.Header.Peek("content-encoding")) {
@@ -20,8 +19,8 @@ func ReadBody(res *fasthttp.Response, logger *logrus.Logger) []byte {
 	}
 
 	if err != nil {
-		logger.Error(err)
+		return nil, err
 	}
 
-	return body
+	return body, nil
 }

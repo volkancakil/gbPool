@@ -13,22 +13,39 @@
 
 ### 安装
 
-    // 1.将以下命令添加到go.mod文件即可
+    1.将以下命令添加到go.mod文件即可
     github.com/jobber2955/gbPool latest
-    // 2.把proxy_pool.yaml.example文件复制到你项目的根目录下，当然你也可以将example文件中的内容集成到你自己的配置文件中。注意：如果选择集成的方式，别忘了修改/pool/pool.go文件中的配置读取设置
+    2.把proxy_pool.yaml.example文件复制到你项目的根目录下，当然你也可以将example文件中的内容集成到你自己的配置文件中。注意：如果选择集成的方式，别忘了修改/pool/pool.go文件中的配置读取设置
+    3.记得使用正确的Config！
 ### 样例
 
     // 模块根目录下有哥testing.go文件可以拿来测试。
-    logger := logrus.New()
-	logger.SetReportCaller(true)
-	proxyPool := pool.NewProxyPool(logger)
-	proxyPool.NewManager("ihuan")
+    proxyPool := pool.NewProxyPool(10)
+	if err := proxyPool.NewManager("ihuan", &public.IhuanConfig{
+		Num:         "5",
+		Anonymity:   "",
+		Type:        "",
+		Post:        "",
+		Sort:        "1",
+		Port:        "",
+		KillPort:    "",
+		Address:     "中国",
+		Key:         "",
+		KillAddress: "",
+	}); err != nil {
+		fmt.Println(err)
+		return
+	}
 	for {
+		fmt.Println(len(proxyPool.ProxyChan))
 		proxy := <- proxyPool.ProxyChan
 		fmt.Println(proxy.Address)
 		time.Sleep(time.Second)
+
+		// Emulate reuse proxy, be careful, if the channel is full, this will try forever
+		// you need to check the length of channel first
 		t := rand.Intn(9)
-		if t > 5 {
+		if t > 5 && len(proxyPool.ProxyChan) < 10 {
 			proxy.ReUse(proxyPool.ProxyChan)
 		}
 	}
@@ -41,6 +58,6 @@
 - 我是编程小白，有任何程序、设计或其他方面的bug、建议，欢迎在issue中提出。
 
 ### TODO
-- 也许将配置文件改为参数传入
+- ~~也许将配置文件改为参数传入(已完成，并不再使用logger，取而代之的是返回error)~~
 - 支持更多提供商
 - 为函数的用途补充说明

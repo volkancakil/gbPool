@@ -1,35 +1,34 @@
 package monitor
 
 import (
+	"fmt"
 	"gbPool/fetcher"
 	"gbPool/public"
-	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 	"time"
 )
 
-func NewMonitor(source chan *public.Proxy, fetcher fetcher.Fetcher, logger *logrus.Logger) *Monitor {
+func NewMonitor(source chan *public.Proxy, fetcher fetcher.Fetcher, edge int) (*Monitor, error) {
 	m := &Monitor{
 		fetcher: fetcher,
-		logger:  logger,
 		source:  source,
+		edge: edge,
 	}
 
 	go m.monitor()
-	return m
+	return m, nil
 }
 
 type Monitor struct {
 	fetcher  fetcher.Fetcher
-	logger   *logrus.Logger
 	source   chan *public.Proxy
 	fetching bool
+	edge	 int
 }
 
 func (m *Monitor) monitor() {
 	ticker := time.NewTicker(3 * time.Second)
 	for {
-		if len(m.source) < viper.GetInt("size")*3 && !m.fetching {
+		if len(m.source) < m.edge && !m.fetching {
 			m.fetching = true
 			go m.update()
 		}
@@ -38,6 +37,11 @@ func (m *Monitor) monitor() {
 }
 
 func (m *Monitor) update() {
-	m.fetcher.Do()
+	err := m.fetcher.Do()
+	if err != nil {
+		// TODO: Is any other good way for exposing error to client?
+		fmt.Printf("Error: %s\n", err)
+		return
+	}
 	m.fetching = false
 }
