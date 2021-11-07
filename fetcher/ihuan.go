@@ -8,9 +8,7 @@ import (
 	"gbPool/utils"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/google/go-querystring/query"
-	"github.com/spf13/viper"
 	"github.com/valyala/fasthttp"
-	"github.com/valyala/fasthttp/fasthttpproxy"
 	"regexp"
 	"strings"
 	"time"
@@ -26,9 +24,6 @@ func NewIhuanFetcher(dest chan *public.Proxy, config *public.IhuanConfig) *ihuan
 	client := &fasthttp.Client{
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 15 * time.Second,
-	}
-	if viper.GetBool("debug") && viper.GetString("proxy") != "" {
-		client.Dial = fasthttpproxy.FasthttpHTTPDialer(viper.GetString("proxy"))
 	}
 
 	return &ihuanFetcher{
