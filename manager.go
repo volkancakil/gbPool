@@ -3,7 +3,6 @@ package gbPool
 import (
 	"errors"
 	"fmt"
-	"github.com/jobber2955/gbPool/fetcher"
 	"strconv"
 	"sync"
 )
@@ -43,7 +42,7 @@ func newProxyManager(managerType string, proxyChan chan *Proxy, config interface
 
 		// If conversion failed, edge will be 0, and that's normal and ok
 		edge, _ = strconv.Atoi(c.Num)
-		f := fetcher.NewIhuanFetcher(mgr.proxyChan, c)
+		f := NewIhuanFetcher(mgr.proxyChan, c)
 		mgr.fetcher = f
 	default:
 		return nil, errors.New(fmt.Sprintf("unknown type: %s", managerType))
