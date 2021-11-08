@@ -1,7 +1,9 @@
-package gbPool
+package monitor
 
 import (
 	"fmt"
+	"github.com/jobber2955/gbPool/fether"
+	"github.com/jobber2955/gbPool/public"
 	"time"
 )
 
@@ -9,7 +11,7 @@ import (
 // if its proxies is fewer than edge, re-fill it.
 // source is the proxy channel that needs to be monitored, fetcher is the fetcher used when monitor needs to re-fill channel
 // edge is the "danger" low limit of the channel.
-func NewMonitor(source chan *Proxy, fetcher Fetcher, edge int) (*Monitor, error) {
+func NewMonitor(source chan *public.Proxy, fetcher fether.Fetcher, edge int) (*Monitor, error) {
 	m := &Monitor{
 		fetcher: fetcher,
 		source:  source,
@@ -21,8 +23,8 @@ func NewMonitor(source chan *Proxy, fetcher Fetcher, edge int) (*Monitor, error)
 }
 
 type Monitor struct {
-	fetcher Fetcher
-	source  chan *Proxy
+	fetcher fether.Fetcher
+	source  chan *public.Proxy
 	fetching bool
 	edge	 int
 }

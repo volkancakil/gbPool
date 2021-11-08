@@ -1,4 +1,4 @@
-package gbPool
+package fether
 
 import (
 	"bytes"
@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/google/go-querystring/query"
+	"github.com/jobber2955/gbPool/public"
 	"github.com/jobber2955/gbPool/utils"
 	"github.com/valyala/fasthttp"
 	"regexp"
@@ -21,7 +22,7 @@ var (
 
 // NewIhuanFetcher Create a new ihuan proxy fetcher, dest is the destination proxy channel, where fetched proxies are going.
 // config is the specific config struct for ihuan
-func NewIhuanFetcher(dest chan *Proxy, config *IhuanConfig) *ihuanFetcher {
+func NewIhuanFetcher(dest chan *public.Proxy, config *public.IhuanConfig) *ihuanFetcher {
 	client := &fasthttp.Client{
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 15 * time.Second,
@@ -36,10 +37,10 @@ func NewIhuanFetcher(dest chan *Proxy, config *IhuanConfig) *ihuanFetcher {
 
 type ihuanFetcher struct {
 	httpClient *fasthttp.Client
-	dest       chan *Proxy
+	dest       chan *public.Proxy
 	key        string
 	rawIps     string
-	config	   *IhuanConfig
+	config	   *public.IhuanConfig
 }
 
 func (i *ihuanFetcher) Do() error {
@@ -174,7 +175,7 @@ func (i *ihuanFetcher) fetch() error {
 
 func (i *ihuanFetcher) parse() {
 	for _, ip := range strings.Split(i.rawIps, "<br/>") {
-		i.dest <- &Proxy{
+		i.dest <- &public.Proxy{
 			Address: ip,
 			Expire:  0,
 		}

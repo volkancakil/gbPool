@@ -1,4 +1,4 @@
-package gbPool
+package public
 
 import "time"
 

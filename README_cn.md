@@ -19,36 +19,35 @@
     3.记得使用正确的Config！
 ### 样例
 
-    // 模块根目录下有哥testing.go文件可以拿来测试。
-    proxyPool := pool.NewProxyPool(10)
-	if err := proxyPool.NewManager("ihuan", &public.IhuanConfig{
-		Num:         "5",
-		Anonymity:   "",
-		Type:        "",
-		Post:        "",
-		Sort:        "1",
-		Port:        "",
-		KillPort:    "",
-		Address:     "中国",
-		Key:         "",
-		KillAddress: "",
-	}); err != nil {
-		fmt.Println(err)
-		return
-	}
-	for {
-		fmt.Println(len(proxyPool.ProxyChan))
-		proxy := <- proxyPool.ProxyChan
-		fmt.Println(proxy.Address)
-		time.Sleep(time.Second)
+    import (
+        "fmt"
+        "github.com/jobber2955/gbPool/pool"
+        "github.com/jobber2955/gbPool/public"
+        "time"
+    )
 
-		// Emulate reuse proxy, be careful, if the channel is full, this will try forever
-		// you need to check the length of channel first
-		t := rand.Intn(9)
-		if t > 5 && len(proxyPool.ProxyChan) < 10 {
-			proxy.ReUse(proxyPool.ProxyChan)
-		}
-	}
+    func main() {
+        proxyPool := pool.NewProxyPool(30)
+        err := proxyPool.NewManager("ihuan", &public.IhuanConfig{
+        Num:         "30",
+        Anonymity:   "",
+        Type:        "",
+        Post:        "",
+        Sort:        "",
+        Port:        "",
+        KillPort:    "",
+        Address:     "",
+        Key:         "",
+        KillAddress: "",
+        })
+        if err != nil {
+            return
+        }
+        for {
+            fmt.Println(<- proxyPool.ProxyChan)
+            time.Sleep(time.Second)
+        }
+    }
 
 ### 注意事项
 - 这是个个人开发的模块，主要目的是帮助人们更方便、更匿名地获取所需数据。

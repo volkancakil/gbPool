@@ -5,8 +5,8 @@ package gbPool
 
 //import (
 //	"fmt"
-//	"gbPool/pool"
-//	"gbPool/public"
+//	"github.com/jobber2955/gbPool/pool"
+//	"github.com/jobber2955/gbPool/public"
 //	"math/rand"
 //	"time"
 //)
