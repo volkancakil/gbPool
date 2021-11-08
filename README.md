@@ -61,3 +61,4 @@
 - ~~Maybe change config file to variable when create new manager.(already changed, and no longer use logger, now we use errors)~~
 - Support more provider
 - Specify the description of function
+- Maybe I should change all the public struct(like &IhuanConfig) to the root directory?

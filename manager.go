@@ -1,11 +1,9 @@
-package pool
+package gbPool
 
 import (
 	"errors"
 	"fmt"
-	"gbPool/fetcher"
-	"gbPool/monitor"
-	"gbPool/public"
+	"github.com/jobber2955/gbPool/fetcher"
 	"strconv"
 	"sync"
 )
@@ -13,9 +11,9 @@ import (
 type manager struct {
 	sync.Mutex
 	enable    bool
-	monitor   *monitor.Monitor
-	fetcher   fetcher.Fetcher
-	proxyChan chan *public.Proxy
+	monitor   *Monitor
+	fetcher   Fetcher
+	proxyChan chan *Proxy
 }
 
 // NewManager Create a new manager for a provider, Manager is used to handle fetch proxy & monitor proxy status
@@ -34,14 +32,14 @@ func (p *ProxyPool) NewManager(managerType string, config interface{}) error {
 	}
 }
 
-func newProxyManager(managerType string, proxyChan chan *public.Proxy, config interface{}) (*manager, error) {
+func newProxyManager(managerType string, proxyChan chan *Proxy, config interface{}) (*manager, error) {
 	edge := 0
 	mgr := &manager{}
 	mgr.proxyChan = proxyChan
 
 	switch managerType {
 	case "ihuan":
-		c := config.(*public.IhuanConfig)
+		c := config.(*IhuanConfig)
 
 		// If conversion failed, edge will be 0, and that's normal and ok
 		edge, _ = strconv.Atoi(c.Num)
@@ -55,7 +53,7 @@ func newProxyManager(managerType string, proxyChan chan *public.Proxy, config in
 		return nil, errors.New(fmt.Sprintf("%s fetcher is nil", managerType))
 	}
 
-	m, err := monitor.NewMonitor(mgr.proxyChan, mgr.fetcher, edge)
+	m, err := NewMonitor(mgr.proxyChan, mgr.fetcher, edge)
 	if err != nil {
 		return nil, err
 	}
