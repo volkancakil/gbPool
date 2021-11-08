@@ -1,4 +1,4 @@
-module gbPool
+module github.com/jobber2955/gbPool
 
 go 1.17
 
