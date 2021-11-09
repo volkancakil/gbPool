@@ -26,7 +26,7 @@ func (p *Proxy) Expired(dest chan *Proxy) {
 	p.ReUse(dest)
 }
 
-type IhuanConfig struct {
+type IHuanConfig struct {
 	Num         string
 	Anonymity   string
 	Type        string

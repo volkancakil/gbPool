@@ -22,7 +22,7 @@ var (
 
 // NewIhuanFetcher Create a new ihuan proxy fetcher, dest is the destination proxy channel, where fetched proxies are going.
 // config is the specific config struct for ihuan
-func NewIhuanFetcher(dest chan *public.Proxy, config *public.IhuanConfig) *ihuanFetcher {
+func NewIhuanFetcher(dest chan *public.Proxy, config *public.IHuanConfig) *ihuanFetcher {
 	client := &fasthttp.Client{
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 15 * time.Second,
@@ -40,7 +40,7 @@ type ihuanFetcher struct {
 	dest       chan *public.Proxy
 	key        string
 	rawIps     string
-	config	   *public.IhuanConfig
+	config	   *public.IHuanConfig
 }
 
 func (i *ihuanFetcher) Do() error {

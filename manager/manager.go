@@ -25,7 +25,7 @@ func NewProxyManager(managerType string, proxyChan chan *public.Proxy, config in
 
 	switch managerType {
 	case "ihuan":
-		c := config.(*public.IhuanConfig)
+		c := config.(*public.IHuanConfig)
 
 		// If conversion failed, edge will be 0, and that's normal and ok
 		edge, _ = strconv.Atoi(c.Num)

@@ -17,6 +17,11 @@ func NewProxyPool(channelSize int) *ProxyPool {
 	}
 }
 
+type ProxyPool struct {
+	ProxyChan chan *public.Proxy
+	ProxyMgr  map[string]*manager.Manager
+}
+
 // NewManager Create a new manager for a provider, Manager is used to handle fetch proxy & monitor proxy status
 // managerType is the type of manager needs to be created.
 // config is the specific type of config for that manager
@@ -40,7 +45,4 @@ func (p *ProxyPool) Switch(old, new string) {
 	p.ProxyMgr[new].Enable()
 }
 
-type ProxyPool struct {
-	ProxyChan chan *public.Proxy
-	ProxyMgr  map[string]*manager.Manager
-}
+
